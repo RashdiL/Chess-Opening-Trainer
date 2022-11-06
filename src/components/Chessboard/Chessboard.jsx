@@ -3,7 +3,7 @@ import "./Chessboard.css";
 import { VERTICAL_AXIS, HORIZONTAL_AXIS } from "../../Constants";
 import Tile from "../Tile/Tile";
 import Game from "../../chess-classes/Game";
-const Chessboard = ({}) => {
+const Chessboard = ({ setGameHistory }) => {
   const [activePiece, setActivePiece] = useState(null);
   const [gameState, setGameState] = useState(new Game(true));
   const chessboardRef = useRef(null);
@@ -20,6 +20,8 @@ const Chessboard = ({}) => {
       setBoard(createBoard());
       console.log("creating new board");
       setNewMove(false);
+      console.log(gameState.chess.history());
+      setGameHistory(gameState.chess.history());
     }
   }, [newMove]);
   //adjust this to move pieces only is it is legal.

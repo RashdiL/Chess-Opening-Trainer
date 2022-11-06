@@ -211,7 +211,7 @@ class Game {
             false,
             pieceId[0] === "w" ? "white" : "black",
             pieceId[0] === "w" ? "wq" + this.nQueens : "bq" + this.nQueens,
-            "assets/images/queen_b.png"
+            `assets/images/queen_${pieceId[0]}.png`
           )
         )
       : currentBoard[to_y][to_x].setPiece(originalPiece);
