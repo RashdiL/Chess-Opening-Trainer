@@ -19,7 +19,7 @@ export default function Movehistory({ history }) {
     setFormattedHistory(formatHistory(history));
   }, [history]);
   return (
-    <div>
+    <div className="overflow-auto h-60">
       <table>
         <tbody>
           <tr>

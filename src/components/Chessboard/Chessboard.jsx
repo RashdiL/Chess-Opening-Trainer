@@ -7,20 +7,18 @@ const Chessboard = ({ setGameHistory }) => {
   const [activePiece, setActivePiece] = useState(null);
   const [gameState, setGameState] = useState(new Game(true));
   const chessboardRef = useRef(null);
-  const modalRef = useRef(null);
   const [grabPosition, setGrabPosition] = useState({ x: -1, y: -1 });
-  const [promotionPawn, setPromotionPawn] = useState();
-  const [pieces, setPieces] = useState();
   const [board, setBoard] = useState(createBoard());
   const [grabbedPieceID, setGrabbedPieceID] = useState();
   const [newMove, setNewMove] = useState(true);
+  const [allGameStates, setAllGameStates] = useState();
   //this can now be replaced by new Chess()
   useEffect(() => {
     if (newMove) {
       setBoard(createBoard());
       console.log("creating new board");
       setNewMove(false);
-      console.log(gameState.chess.history());
+      console.log(gameState.getBoard());
       setGameHistory(gameState.chess.history());
     }
   }, [newMove]);

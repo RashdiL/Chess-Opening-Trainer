@@ -7,7 +7,7 @@ import Square from "./Square";
  */
 
 class Game {
-  constructor(thisPlayersColorIsWhite) {
+  constructor(thisPlayersColorIsWhite, chessboard = this.makeStartingBoard()) {
     this.thisPlayersColorIsWhite = thisPlayersColorIsWhite; // once initialized, this value should never change.
     // console.log("this player's color is white: " + this.thisPlayersColorIsWhite)
     this.chessBoard = this.makeStartingBoard(); // the actual chessBoard
