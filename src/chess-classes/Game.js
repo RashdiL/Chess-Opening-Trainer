@@ -7,11 +7,11 @@ import Square from "./Square";
  */
 
 class Game {
-  constructor(thisPlayersColorIsWhite, chessboard = this.makeStartingBoard()) {
+  constructor(thisPlayersColorIsWhite) {
     this.thisPlayersColorIsWhite = thisPlayersColorIsWhite; // once initialized, this value should never change.
     // console.log("this player's color is white: " + this.thisPlayersColorIsWhite)
-    this.chessBoard = this.makeStartingBoard(); // the actual chessBoard
     this.chess = new Chess();
+    this.chessBoard = this.makeStartingBoard(); // the actual chessBoard
 
     //Converts our 0 - 7 coords to chess 1 - 8 vertical coords
     this.toCoord = thisPlayersColorIsWhite
@@ -163,10 +163,6 @@ class Game {
           piece: pieceId[1],
           promotion: "q",
         });
-    console.log("move is");
-
-    console.log(moveAttempt);
-    // console.log(isPromotion)
 
     if (moveAttempt === null) {
       return "invalid move";
@@ -333,16 +329,13 @@ class Game {
   }
 
   makeStartingBoard() {
-    const backRank = [
-      "rook",
-      "knight",
-      "bishop",
-      "queen",
-      "king",
-      "bishop",
-      "knight",
-      "rook",
-    ];
+    const backRank = {
+      r: "rook",
+      n: "knight",
+      b: "bishop",
+      q: "queen",
+      k: "king",
+    };
     var startingChessBoard = [];
     //Initialize all the squares.
     for (var y = 0; y < 8; y++) {
@@ -356,83 +349,33 @@ class Game {
         startingChessBoard[y].push(emptySquare);
       }
     }
-    const whiteBackRankId = [
-      "wr1",
-      "wn1",
-      "wb1",
-      "wq1",
-      "wk1",
-      "wb2",
-      "wn2",
-      "wr2",
-    ];
-    const blackBackRankId = [
-      "br1",
-      "bn1",
-      "bb1",
-      "bq1",
-      "bk1",
-      "bb2",
-      "bn2",
-      "br2",
-    ];
-    let team = this.thisPlayersColorIsWhite ? "white" : "black";
-    for (var y = 0; y < 8; y += 7) {
-      for (var x = 0; x < 8; x++) {
-        //Initialize Our Pieces
-        if (y === 0) {
-          // top
-          // console.log(backRank[i])
-          let horizontalChessCoord = this.thisPlayersColorIsWhite ? x : 7 - x; // For the white player. They're left most square is 0 but for the black player it is 7.
-          let pieceID = this.thisPlayersColorIsWhite
-            ? whiteBackRankId[x]
-            : blackBackRankId[x];
-          startingChessBoard[y][horizontalChessCoord].setPiece(
-            new ChessPiece(
-              backRank[x],
-              false,
-              team,
-              pieceID,
-              `assets/images/${backRank[x]}_${team[0]}.png`
-            )
-          );
-          startingChessBoard[y + 1][horizontalChessCoord].setPiece(
-            new ChessPiece(
-              "pawn",
-              false,
-              team,
-              this.thisPlayersColorIsWhite ? "wp" + x : "bp" + x,
-              `assets/images/pawn_${team[0]}.png`
-            )
-          );
-        } else {
-          //Initialize Our Pieces
-          // bottom
-          let enemyTeam = team === "white" ? "black" : "white";
-          let horizontalChessCoord = this.thisPlayersColorIsWhite ? x : 7 - x; // For the white player. They're left most square is 0 but for the black player it is 7.
-          let pieceID = this.thisPlayersColorIsWhite
-            ? blackBackRankId[x]
-            : whiteBackRankId[x];
-          startingChessBoard[y - 1][horizontalChessCoord].setPiece(
-            new ChessPiece(
-              "pawn",
-              false,
-              enemyTeam,
-              this.thisPlayersColorIsWhite ? "bp" + x : "wp" + x,
-              `assets/images/pawn_${enemyTeam[0]}.png`
-            )
-          );
-
-          startingChessBoard[y][horizontalChessCoord].setPiece(
-            new ChessPiece(
-              backRank[x],
-              false,
-              enemyTeam,
-              pieceID,
-              `assets/images/${backRank[x]}_${enemyTeam[0]}.png`
-            )
-          );
-        }
+    const chess = new Chess();
+    let chessjsBoard = chess.board();
+    console.log("chessboard");
+    console.log(chessjsBoard);
+    for (let i = 0; i < chessjsBoard.length; i++) {
+      for (let j = 0; j < chessjsBoard[0].length; j++) {
+        console.log(chessjsBoard[i][j]);
+        let square = chessjsBoard[i][j]["square"];
+        console.log(square.at(0));
+        console.log(this.toAlphabet2["a"]);
+        console.log(this.toAlphabet2[square.at(0)]);
+        let x = this.toAlphabet2[square.at(0)];
+        console.log(x);
+        let y = this.toCoord2[square.at(1)];
+        let pieceType = chessjsBoard[i][j]["type"];
+        console.log(pieceType);
+        let pieceColor = chessjsBoard[i][j]["color"];
+        console.log(pieceColor);
+        startingChessBoard[y][x].setPiece(
+          new ChessPiece(
+            backRank[pieceType],
+            false,
+            pieceColor === "b" ? "black" : "white",
+            square.at(0) + square.at(1),
+            `assets/images/${backRank[pieceType]}_${pieceColor}.png`
+          )
+        );
       }
     }
     return startingChessBoard;

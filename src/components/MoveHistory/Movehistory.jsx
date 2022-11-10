@@ -28,7 +28,6 @@ export default function Movehistory({ history }) {
           </tr>
           {formattedHistory &&
             formattedHistory.map((element) => {
-              console.log(`printing ${element[0]}`);
               return (
                 <tr>
                   <td>{element[0]}</td>

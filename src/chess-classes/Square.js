@@ -1,8 +1,7 @@
 class Square {
-  constructor(x, y, pieceOnThisSquare, canvasCoord) {
+  constructor(x, y, pieceOnThisSquare) {
     this.x = x; // Int 0 < x < 7
     this.y = y; // Int 0 < y < 7
-    this.canvasCoord = canvasCoord;
     this.pieceOnThisSquare = pieceOnThisSquare; // ChessPiece || null
   }
 
@@ -51,10 +50,6 @@ class Square {
 
   getCoord() {
     return [this.x, this.y];
-  }
-
-  getCanvasCoord() {
-    return this.canvasCoord;
   }
 }
 

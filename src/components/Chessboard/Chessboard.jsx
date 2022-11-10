@@ -8,20 +8,29 @@ const Chessboard = ({ setGameHistory }) => {
   const [gameState, setGameState] = useState(new Game(true));
   const chessboardRef = useRef(null);
   const [grabPosition, setGrabPosition] = useState({ x: -1, y: -1 });
-  const [board, setBoard] = useState(createBoard());
+  const [board, setBoard] = useState(createBoard(gameState.getBoard()));
   const [grabbedPieceID, setGrabbedPieceID] = useState();
   const [newMove, setNewMove] = useState(true);
-  const [allGameStates, setAllGameStates] = useState();
+  const [allGameFEN, setAllGameFEN] = useState([]);
+  const [fenPointer, setFENPointer] = useState(-1);
+  const [undoMove, setUndoMove] = useState(false);
   //this can now be replaced by new Chess()
   useEffect(() => {
     if (newMove) {
-      setBoard(createBoard());
+      setFENPointer(fenPointer + 1);
+      setBoard(createBoard(gameState.getBoard()));
       console.log("creating new board");
       setNewMove(false);
-      console.log(gameState.getBoard());
       setGameHistory(gameState.chess.history());
+      setAllGameFEN([...allGameFEN, gameState.chess.fen()]);
+      console.log(allGameFEN);
     }
   }, [newMove]);
+
+  useEffect(() => {
+    setBoard(createBoard(gameState.getBoard()));
+  }, [gameState]);
+
   //adjust this to move pieces only is it is legal.
   function handlePieceMovement(e) {
     const element = e.target;
@@ -56,7 +65,6 @@ const Chessboard = ({ setGameHistory }) => {
         )
       );
       const attemptedMove = gameState.movePiece(grabbedPieceID, [x, y], true);
-      console.log(attemptedMove);
       if (
         attemptedMove !== "invalid move" &&
         attemptedMove !== "moved in the same position."
@@ -129,18 +137,27 @@ const Chessboard = ({ setGameHistory }) => {
     }
   }
 
-  function createBoard() {
+  function createBoard(pieces) {
     let board = [];
     for (let j = VERTICAL_AXIS.length - 1; j >= 0; j--) {
       for (let i = 0; i < HORIZONTAL_AXIS.length; i++) {
         const number = j + i + 2;
-        const square = gameState.getBoard()[j][i];
+        const square = pieces[j][i];
         const piece = square.pieceOnThisSquare;
         let image = piece ? piece.image : undefined;
         board.push(<Tile key={`${j},${i}`} image={image} number={number} />);
       }
     }
     return board;
+  }
+
+  function goToPreviousBoardState(e) {
+    console.log(gameState.chess.board());
+    const newfenPointer = fenPointer - 1;
+    setFENPointer(newfenPointer);
+    let newGameState = new Game(true);
+    console.log(newGameState.chess.load(allGameFEN[newfenPointer]));
+    setGameState(newGameState);
   }
 
   return (
@@ -154,6 +171,7 @@ const Chessboard = ({ setGameHistory }) => {
           ref={chessboardRef}
         >
           {board}
+          <button onClick={(e) => goToPreviousBoardState(e)}>Undo</button>
         </div>
       </div>
     </>
