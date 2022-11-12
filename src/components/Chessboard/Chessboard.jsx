@@ -3,27 +3,46 @@ import "./Chessboard.css";
 import { VERTICAL_AXIS, HORIZONTAL_AXIS } from "../../Constants";
 import Tile from "../Tile/Tile";
 import Game from "../../chess-classes/Game";
-const Chessboard = ({ setGameHistory }) => {
+const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
   const [activePiece, setActivePiece] = useState(null);
   const [gameState, setGameState] = useState(new Game(true));
   const chessboardRef = useRef(null);
   const [grabPosition, setGrabPosition] = useState({ x: -1, y: -1 });
   const [board, setBoard] = useState(createBoard(gameState.getBoard()));
   const [grabbedPieceID, setGrabbedPieceID] = useState();
-  const [newMove, setNewMove] = useState(true);
+  const [newMove, setNewMove] = useState(false);
   const [allGameFEN, setAllGameFEN] = useState([]);
   const [fenPointer, setFENPointer] = useState(-1);
   const [undoMove, setUndoMove] = useState(false);
+  const [startingBoard, setStartingBoard] = useState(true);
   //this can now be replaced by new Chess()
   useEffect(() => {
     if (newMove) {
+      const oldFENPointer = fenPointer;
       setFENPointer(fenPointer + 1);
+      setCurrentMove(fenPointer + 1);
       setBoard(createBoard(gameState.getBoard()));
       setNewMove(false);
-      setGameHistory(gameState.chess.history());
+      //setGameHistory(gameState.chess.history());
+      setGameHistory(
+        history
+          .slice(0, oldFENPointer)
+          .concat(gameState.chess.history().slice(-1))
+      );
       setAllGameFEN([...allGameFEN, gameState.chess.fen()]);
     }
   }, [newMove]);
+
+  useEffect(() => {
+    if (startingBoard) {
+      setFENPointer(fenPointer + 1);
+      setCurrentMove(fenPointer + 1);
+      setBoard(createBoard(gameState.getBoard()));
+      setStartingBoard(false);
+      setGameHistory(gameState.chess.history());
+      setAllGameFEN([...allGameFEN, gameState.chess.fen()]);
+    }
+  }, [startingBoard]);
 
   useEffect(() => {
     setBoard(createBoard(gameState.getBoard()));
@@ -151,6 +170,7 @@ const Chessboard = ({ setGameHistory }) => {
 
   function goToPreviousBoardState(e) {
     const newfenPointer = fenPointer - 1;
+    setCurrentMove(newfenPointer);
     setFENPointer(newfenPointer);
     const newGameFen = allGameFEN[newfenPointer];
     let newGameState = new Game(true, newGameFen);
@@ -162,6 +182,7 @@ const Chessboard = ({ setGameHistory }) => {
       return;
     }
     const newfenPointer = fenPointer + 1;
+    setCurrentMove(newfenPointer);
     setFENPointer(newfenPointer);
     const newGameFen = allGameFEN[newfenPointer];
     let newGameState = new Game(true, newGameFen);
@@ -170,17 +191,19 @@ const Chessboard = ({ setGameHistory }) => {
 
   return (
     <>
-      <div className="chessboard-container">
-        <div
-          onMouseMove={(e) => handlePieceMovement(e)}
-          onMouseDown={(e) => handlePieceMovement(e)}
-          onMouseUp={(e) => handlePieceMovement(e)}
-          id="chessboard"
-          ref={chessboardRef}
-        >
-          {board}
-          <button onClick={(e) => goToPreviousBoardState(e)}>Undo</button>
-          <button onClick={(e) => goToNextBoardState(e)}>Redo</button>
+      <div
+        onMouseMove={(e) => handlePieceMovement(e)}
+        onMouseDown={(e) => handlePieceMovement(e)}
+        onMouseUp={(e) => handlePieceMovement(e)}
+        id="chessboard"
+        ref={chessboardRef}
+      >
+        {board}
+        <div className="w-[32vw] justify-center grid grid-cols-2">
+          <button onClick={(e) => goToPreviousBoardState(e)}>&#x2190;</button>
+          <button onClick={(e) => goToNextBoardState(e)} className=" ">
+            &#x2192;
+          </button>
         </div>
       </div>
     </>

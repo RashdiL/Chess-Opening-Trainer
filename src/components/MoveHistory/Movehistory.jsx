@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-export default function Movehistory({ history }) {
+export default function Movehistory({ history, currentMove }) {
   const [formattedHistory, setFormattedHistory] = useState();
   function formatHistory(history) {
     if (!history) return;
@@ -15,28 +15,47 @@ export default function Movehistory({ history }) {
     return newHistory;
   }
   useEffect(() => {
-    console.log(formatHistory(history));
     setFormattedHistory(formatHistory(history));
   }, [history]);
   return (
-    <div className="overflow-auto h-60">
-      <table>
-        <tbody>
-          <tr>
-            <th>White</th>
-            <th>Black</th>
-          </tr>
+    <div className="overflow-auto h-60 w-[10vw]">
+      <div className="table w-full">
+        <div class="table-header-group ...">
+          <div class="table-row">
+            <div class="table-cell text-left ...">WHITE</div>
+            <div class="table-cell text-left ...">BLACK</div>
+          </div>
+        </div>
+        <div class="table-row-group">
           {formattedHistory &&
-            formattedHistory.map((element) => {
-              return (
-                <tr>
-                  <td>{element[0]}</td>
-                  <td>{element[1]}</td>
-                </tr>
-              );
+            formattedHistory.map((element, index) => {
+              if (Math.floor((currentMove - 1) / 2) === index) {
+                if ((currentMove - 1) % 2 === 0) {
+                  return (
+                    <div class="table-row">
+                      <div class="table-cell bg-cyan-200">{element[0]}</div>
+                      <div class="table-cell ...">{element[1]}</div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div class="table-row">
+                      <div class="table-cell">{element[0]}</div>
+                      <div class="table-cell  bg-cyan-200">{element[1]}</div>
+                    </div>
+                  );
+                }
+              } else {
+                return (
+                  <div class="table-row">
+                    <div class="table-cell ...">{element[0]}</div>
+                    <div class="table-cell ...">{element[1]}</div>
+                  </div>
+                );
+              }
             })}
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
   );
 }
