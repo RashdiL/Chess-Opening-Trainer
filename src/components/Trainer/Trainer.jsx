@@ -8,7 +8,7 @@ export default function Trainer() {
   return (
     <>
       <nav>Hello</nav>
-      <div className=" grid grid-cols-2 gap-y-0 h-[32vw] w-[70vw] mx-[20vw] my-[10vw]">
+      <div className=" grid grid-flow-col gap-2 h-[32vw] w-[80vw] mx-[20vw] my-[10vw] auto-cols-min">
         <Chessboard
           setCurrentMove={setCurrentMove}
           setGameHistory={setGameHistory}
@@ -20,6 +20,7 @@ export default function Trainer() {
           history={history}
           className="m-0 p-0"
         />
+        <h2 className="">Saved Openings</h2>
       </div>
     </>
   );

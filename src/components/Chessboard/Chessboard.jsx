@@ -29,7 +29,10 @@ const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
           .slice(0, oldFENPointer)
           .concat(gameState.chess.history().slice(-1))
       );
-      setAllGameFEN([...allGameFEN, gameState.chess.fen()]);
+      setAllGameFEN([
+        ...allGameFEN.slice(0, fenPointer + 1),
+        gameState.chess.fen(),
+      ]);
     }
   }, [newMove]);
 
