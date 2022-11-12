@@ -19,11 +19,9 @@ const Chessboard = ({ setGameHistory }) => {
     if (newMove) {
       setFENPointer(fenPointer + 1);
       setBoard(createBoard(gameState.getBoard()));
-      console.log("creating new board");
       setNewMove(false);
       setGameHistory(gameState.chess.history());
       setAllGameFEN([...allGameFEN, gameState.chess.fen()]);
-      console.log(allGameFEN);
     }
   }, [newMove]);
 
@@ -152,11 +150,21 @@ const Chessboard = ({ setGameHistory }) => {
   }
 
   function goToPreviousBoardState(e) {
-    console.log(gameState.chess.board());
     const newfenPointer = fenPointer - 1;
     setFENPointer(newfenPointer);
-    let newGameState = new Game(true);
-    console.log(newGameState.chess.load(allGameFEN[newfenPointer]));
+    const newGameFen = allGameFEN[newfenPointer];
+    let newGameState = new Game(true, newGameFen);
+    setGameState(newGameState);
+  }
+
+  function goToNextBoardState(e) {
+    if (fenPointer >= allGameFEN.length - 1) {
+      return;
+    }
+    const newfenPointer = fenPointer + 1;
+    setFENPointer(newfenPointer);
+    const newGameFen = allGameFEN[newfenPointer];
+    let newGameState = new Game(true, newGameFen);
     setGameState(newGameState);
   }
 
@@ -172,6 +180,7 @@ const Chessboard = ({ setGameHistory }) => {
         >
           {board}
           <button onClick={(e) => goToPreviousBoardState(e)}>Undo</button>
+          <button onClick={(e) => goToNextBoardState(e)}>Redo</button>
         </div>
       </div>
     </>

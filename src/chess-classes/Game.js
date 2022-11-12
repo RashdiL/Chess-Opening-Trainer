@@ -7,11 +7,11 @@ import Square from "./Square";
  */
 
 class Game {
-  constructor(thisPlayersColorIsWhite) {
+  constructor(thisPlayersColorIsWhite, FEN) {
     this.thisPlayersColorIsWhite = thisPlayersColorIsWhite; // once initialized, this value should never change.
     // console.log("this player's color is white: " + this.thisPlayersColorIsWhite)
-    this.chess = new Chess();
-    this.chessBoard = this.makeStartingBoard(); // the actual chessBoard
+    //this.chess = new Chess();
+    this.chessBoard = this.makeStartingBoard(FEN); // the actual chessBoard
 
     //Converts our 0 - 7 coords to chess 1 - 8 vertical coords
     this.toCoord = thisPlayersColorIsWhite
@@ -328,13 +328,59 @@ class Game {
     }
   }
 
-  makeStartingBoard() {
+  makeStartingBoard(FEN) {
+    console.log("running");
+    const toAlphabet2 = this.thisPlayersColorIsWhite
+      ? {
+          a: 0,
+          b: 1,
+          c: 2,
+          d: 3,
+          e: 4,
+          f: 5,
+          g: 6,
+          h: 7,
+        }
+      : {
+          h: 0,
+          g: 1,
+          f: 2,
+          e: 3,
+          d: 4,
+          c: 5,
+          b: 6,
+          a: 7,
+        };
+
+    const toCoord2 = this.thisPlayersColorIsWhite
+      ? {
+          1: 0,
+          2: 1,
+          3: 2,
+          4: 3,
+          5: 4,
+          6: 5,
+          7: 6,
+          8: 7,
+        }
+      : {
+          8: 0,
+          7: 1,
+          6: 2,
+          5: 3,
+          4: 4,
+          3: 5,
+          2: 6,
+          1: 7,
+        };
+
     const backRank = {
       r: "rook",
       n: "knight",
       b: "bishop",
       q: "queen",
       k: "king",
+      p: "pawn",
     };
     var startingChessBoard = [];
     //Initialize all the squares.
@@ -349,24 +395,19 @@ class Game {
         startingChessBoard[y].push(emptySquare);
       }
     }
-    const chess = new Chess();
-    let chessjsBoard = chess.board();
-    console.log("chessboard");
-    console.log(chessjsBoard);
+    this.chess = new Chess(FEN);
+    //const chess = new Chess();
+    let chessjsBoard = this.chess.board();
     for (let i = 0; i < chessjsBoard.length; i++) {
       for (let j = 0; j < chessjsBoard[0].length; j++) {
-        console.log(chessjsBoard[i][j]);
+        if (!chessjsBoard[i][j]) {
+          continue;
+        }
         let square = chessjsBoard[i][j]["square"];
-        console.log(square.at(0));
-        console.log(this.toAlphabet2["a"]);
-        console.log(this.toAlphabet2[square.at(0)]);
-        let x = this.toAlphabet2[square.at(0)];
-        console.log(x);
-        let y = this.toCoord2[square.at(1)];
+        let x = toAlphabet2[square.at(0)];
+        let y = toCoord2[square.at(1)];
         let pieceType = chessjsBoard[i][j]["type"];
-        console.log(pieceType);
         let pieceColor = chessjsBoard[i][j]["color"];
-        console.log(pieceColor);
         startingChessBoard[y][x].setPiece(
           new ChessPiece(
             backRank[pieceType],
