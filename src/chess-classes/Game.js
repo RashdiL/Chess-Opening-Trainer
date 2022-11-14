@@ -223,18 +223,17 @@ class Game {
     const checkMate = this.chess.isCheckmate()
       ? " has been checkmated"
       : " has not been checkmated";
-    console.log(this.chess.turn() + checkMate);
+
     if (checkMate === " has been checkmated") {
       return this.chess.turn() + checkMate;
     }
     // changes the fill color of the opponent's king that is in check
     const check = this.chess.inCheck() ? " is in check" : " is not in check";
-    console.log(this.chess.turn() + check);
+
     if (check === " is in check") {
       return this.chess.turn() + check;
     }
 
-    console.log(currentBoard);
     // update board
     this.setBoard(currentBoard);
   }
@@ -329,7 +328,6 @@ class Game {
   }
 
   makeStartingBoard(FEN) {
-    console.log("running");
     const toAlphabet2 = this.thisPlayersColorIsWhite
       ? {
           a: 0,

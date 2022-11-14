@@ -21,7 +21,7 @@ class Square {
       this.pieceOnThisSquare.color !== newPiece.color
     ) {
       // case where the function caller wants to change the piece on this square. (only different color allowed)
-      console.log("capture!");
+
       this.pieceOnThisSquare = newPiece;
       newPiece.setSquare(this);
     } else {

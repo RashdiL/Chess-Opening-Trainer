@@ -3,55 +3,30 @@ import "./Chessboard.css";
 import { VERTICAL_AXIS, HORIZONTAL_AXIS } from "../../Constants";
 import Tile from "../Tile/Tile";
 import Game from "../../chess-classes/Game";
-const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
+const Chessboard = ({
+  setHistory,
+  setCurrentMove,
+  history,
+  checkNewMove,
+  resetBoard,
+  setResetBoard,
+}) => {
   const [activePiece, setActivePiece] = useState(null);
   const [gameState, setGameState] = useState(new Game(true));
   const chessboardRef = useRef(null);
   const [grabPosition, setGrabPosition] = useState({ x: -1, y: -1 });
   const [board, setBoard] = useState(createBoard(gameState.getBoard()));
   const [grabbedPieceID, setGrabbedPieceID] = useState();
-  const [newMove, setNewMove] = useState(false);
-  const [allGameFEN, setAllGameFEN] = useState([]);
-  const [fenPointer, setFENPointer] = useState(-1);
-  const [undoMove, setUndoMove] = useState(false);
-  const [startingBoard, setStartingBoard] = useState(true);
-  //this can now be replaced by new Chess()
+  const [allGameFEN, setAllGameFEN] = useState([gameState.chess.fen()]);
+  const [fenPointer, setFENPointer] = useState(0);
+
   useEffect(() => {
-    if (newMove) {
-      const oldFENPointer = fenPointer;
-      setFENPointer(fenPointer + 1);
-      setCurrentMove(fenPointer + 1);
-      setBoard(createBoard(gameState.getBoard()));
-      setNewMove(false);
-      //setGameHistory(gameState.chess.history());
-      setGameHistory(
-        history
-          .slice(0, oldFENPointer)
-          .concat(gameState.chess.history().slice(-1))
-      );
-      setAllGameFEN([
-        ...allGameFEN.slice(0, fenPointer + 1),
-        gameState.chess.fen(),
-      ]);
+    if (resetBoard) {
+      restartGame();
+      setResetBoard(false);
     }
-  }, [newMove]);
+  }, [resetBoard]);
 
-  useEffect(() => {
-    if (startingBoard) {
-      setFENPointer(fenPointer + 1);
-      setCurrentMove(fenPointer + 1);
-      setBoard(createBoard(gameState.getBoard()));
-      setStartingBoard(false);
-      setGameHistory(gameState.chess.history());
-      setAllGameFEN([...allGameFEN, gameState.chess.fen()]);
-    }
-  }, [startingBoard]);
-
-  useEffect(() => {
-    setBoard(createBoard(gameState.getBoard()));
-  }, [gameState]);
-
-  //adjust this to move pieces only is it is legal.
   function handlePieceMovement(e) {
     const element = e.target;
     const chessboard = chessboardRef.current;
@@ -71,7 +46,6 @@ const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
       const square = gameState.getBoard()[grabY][grabX];
       const piece = square.pieceOnThisSquare;
       setGrabbedPieceID(piece.id);
-      console.log(piece.id);
     }
     if (e.type === "mousemove" && activePiece) {
       movePiece(e, chessboard, activePiece);
@@ -89,7 +63,8 @@ const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
         attemptedMove !== "invalid move" &&
         attemptedMove !== "moved in the same position."
       ) {
-        setNewMove(true);
+        //setNewMove(true);
+        makeNewMove();
       } else {
         if (!activePiece) return;
         activePiece.style.position = "relative";
@@ -130,29 +105,19 @@ const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
     const y = e.clientY - GRID_SIZE / 2;
     activePiece.style.position = "absolute";
 
-    //If x is smaller than minimum amount
     if (x < minX) {
       activePiece.style.left = `${minX}px`;
-    }
-    //If x is bigger than maximum amount
-    else if (x > maxX) {
+    } else if (x > maxX) {
       activePiece.style.left = `${maxX}px`;
-    }
-    //If x is in the constraints
-    else {
+    } else {
       activePiece.style.left = `${x}px`;
     }
 
-    //If y is smaller than minimum amount
     if (y < minY) {
       activePiece.style.top = `${minY}px`;
-    }
-    //If y is bigger than maximum amount
-    else if (y > maxY) {
+    } else if (y > maxY) {
       activePiece.style.top = `${maxY}px`;
-    }
-    //If y is in the constraints
-    else {
+    } else {
       activePiece.style.top = `${y}px`;
     }
   }
@@ -178,10 +143,11 @@ const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
     const newGameFen = allGameFEN[newfenPointer];
     let newGameState = new Game(true, newGameFen);
     setGameState(newGameState);
+    setBoard(createBoard(newGameState.getBoard()));
   }
 
   function goToNextBoardState(e) {
-    if (fenPointer >= allGameFEN.length - 1) {
+    if (fenPointer === allGameFEN.length - 1) {
       return;
     }
     const newfenPointer = fenPointer + 1;
@@ -190,6 +156,51 @@ const Chessboard = ({ setGameHistory, setCurrentMove, history }) => {
     const newGameFen = allGameFEN[newfenPointer];
     let newGameState = new Game(true, newGameFen);
     setGameState(newGameState);
+    setBoard(createBoard(newGameState.getBoard()));
+  }
+
+  function restartGame() {
+    const newGameState = new Game(true);
+    setGameState(newGameState);
+    setAllGameFEN(newGameState.chess.fen());
+    setFENPointer(0);
+    setCurrentMove(0);
+    setBoard(createBoard(newGameState.getBoard()));
+    setHistory([]);
+  }
+
+  function reverseIncorrectMove() {
+    const newfenPointer = fenPointer - 1;
+    setCurrentMove(newfenPointer);
+    setFENPointer(newfenPointer);
+    const newGameFen = allGameFEN[newfenPointer];
+    let newGameState = new Game(true, newGameFen);
+    setGameState(newGameState);
+    const lengthOfHistory = history.length;
+    const historyOneMoveAgo = history.slice(0, lengthOfHistory - 1);
+    console.log(historyOneMoveAgo);
+    setHistory(historyOneMoveAgo);
+  }
+
+  function makeNewMove() {
+    const oldFENPointer = fenPointer;
+    setFENPointer(fenPointer + 1);
+    setCurrentMove(fenPointer + 1);
+    setBoard(createBoard(gameState.getBoard()));
+
+    const newHistory = history
+      .slice(0, oldFENPointer)
+      .concat(gameState.chess.history().slice(-1));
+    setHistory(newHistory);
+    const newAllGameFEN = [
+      ...allGameFEN.slice(0, fenPointer + 1),
+      gameState.chess.fen(),
+    ];
+    setAllGameFEN(newAllGameFEN);
+    const checkingMove = checkNewMove(newHistory);
+    if (!checkingMove) {
+      reverseIncorrectMove();
+    }
   }
 
   return (
