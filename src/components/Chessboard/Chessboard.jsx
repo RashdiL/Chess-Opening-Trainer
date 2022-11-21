@@ -10,15 +10,18 @@ const Chessboard = ({
   checkNewMove,
   resetBoard,
   setResetBoard,
+  setWrongToggled,
+  setRightToggled,
+  testingOpening,
 }) => {
   const [activePiece, setActivePiece] = useState(null);
-  const [gameState, setGameState] = useState(new Game(true));
+  const [game, setGame] = useState(new Game(true));
   const chessboardRef = useRef(null);
-  const [grabPosition, setGrabPosition] = useState({ x: -1, y: -1 });
-  const [board, setBoard] = useState(createBoard(gameState.getBoard()));
+  const [board, setBoard] = useState(createBoard(game.getBoard()));
   const [grabbedPieceID, setGrabbedPieceID] = useState();
-  const [allGameFEN, setAllGameFEN] = useState([gameState.chess.fen()]);
+  const [gameFENs, setGameFENs] = useState([game.chess.fen()]);
   const [fenPointer, setFENPointer] = useState(0);
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   useEffect(() => {
     if (resetBoard) {
@@ -27,7 +30,7 @@ const Chessboard = ({
     }
   }, [resetBoard]);
 
-  function handlePieceMovement(e) {
+  async function handlePieceMovement(e) {
     const element = e.target;
     const chessboard = chessboardRef.current;
     if (!element.classList.contains("chess-piece") || !chessboard) return;
@@ -42,8 +45,7 @@ const Chessboard = ({
             GRID_SIZE
         )
       );
-      setGrabPosition({ x: grabX, y: grabY });
-      const square = gameState.getBoard()[grabY][grabX];
+      const square = game.getBoard()[grabY][grabX];
       const piece = square.pieceOnThisSquare;
       setGrabbedPieceID(piece.id);
     }
@@ -58,13 +60,38 @@ const Chessboard = ({
             GRID_SIZE
         )
       );
-      const attemptedMove = gameState.movePiece(grabbedPieceID, [x, y], true);
+      const attemptedMove = game.movePiece(grabbedPieceID, [x, y], true);
+
       if (
         attemptedMove !== "invalid move" &&
         attemptedMove !== "moved in the same position."
       ) {
-        //setNewMove(true);
-        makeNewMove();
+        if (testingOpening) {
+          const checkingMove = checkNewMove(game.chess.history());
+          if (!checkingMove) {
+            activePiece.style.position = "relative";
+            activePiece.style.removeProperty("top");
+            activePiece.style.removeProperty("left");
+            game.chess.undo();
+            const newGame = new Game(true, game.chess.fen());
+            setGame(newGame);
+            setBoard(createBoard(newGame.getBoard()));
+            setWrongToggled(true);
+            await delay(1000);
+            setWrongToggled(false);
+          } else {
+            if (checkingMove === "complete") {
+              makeNewMove();
+              setRightToggled(true);
+              await delay(1000);
+              setRightToggled(false);
+            } else {
+              makeNewMove();
+            }
+          }
+        } else {
+          makeNewMove();
+        }
       } else {
         if (!activePiece) return;
         activePiece.style.position = "relative";
@@ -137,70 +164,56 @@ const Chessboard = ({
   }
 
   function goToPreviousBoardState(e) {
+    if (fenPointer === 0) {
+      return;
+    }
     const newfenPointer = fenPointer - 1;
     setCurrentMove(newfenPointer);
     setFENPointer(newfenPointer);
-    const newGameFen = allGameFEN[newfenPointer];
-    let newGameState = new Game(true, newGameFen);
-    setGameState(newGameState);
-    setBoard(createBoard(newGameState.getBoard()));
+    const newGameFen = gameFENs[newfenPointer];
+    let newGame = new Game(true, newGameFen);
+    setGame(newGame);
+    setBoard(createBoard(newGame.getBoard()));
   }
 
   function goToNextBoardState(e) {
-    if (fenPointer === allGameFEN.length - 1) {
+    if (fenPointer === gameFENs.length - 1) {
       return;
     }
     const newfenPointer = fenPointer + 1;
     setCurrentMove(newfenPointer);
     setFENPointer(newfenPointer);
-    const newGameFen = allGameFEN[newfenPointer];
-    let newGameState = new Game(true, newGameFen);
-    setGameState(newGameState);
-    setBoard(createBoard(newGameState.getBoard()));
+    const newGameFen = gameFENs[newfenPointer];
+    let newGame = new Game(true, newGameFen);
+    setGame(newGame);
+    setBoard(createBoard(newGame.getBoard()));
   }
 
   function restartGame() {
-    const newGameState = new Game(true);
-    setGameState(newGameState);
-    setAllGameFEN(newGameState.chess.fen());
+    const newGame = new Game(true);
+    setGame(newGame);
+    setGameFENs(newGame.chess.fen());
     setFENPointer(0);
     setCurrentMove(0);
-    setBoard(createBoard(newGameState.getBoard()));
+    setBoard(createBoard(newGame.getBoard()));
     setHistory([]);
-  }
-
-  function reverseIncorrectMove() {
-    const newfenPointer = fenPointer - 1;
-    setCurrentMove(newfenPointer);
-    setFENPointer(newfenPointer);
-    const newGameFen = allGameFEN[newfenPointer];
-    let newGameState = new Game(true, newGameFen);
-    setGameState(newGameState);
-    const lengthOfHistory = history.length;
-    const historyOneMoveAgo = history.slice(0, lengthOfHistory - 1);
-    console.log(historyOneMoveAgo);
-    setHistory(historyOneMoveAgo);
   }
 
   function makeNewMove() {
     const oldFENPointer = fenPointer;
     setFENPointer(fenPointer + 1);
     setCurrentMove(fenPointer + 1);
-    setBoard(createBoard(gameState.getBoard()));
+    setBoard(createBoard(game.getBoard()));
 
     const newHistory = history
       .slice(0, oldFENPointer)
-      .concat(gameState.chess.history().slice(-1));
+      .concat(game.chess.history().slice(-1));
     setHistory(newHistory);
     const newAllGameFEN = [
-      ...allGameFEN.slice(0, fenPointer + 1),
-      gameState.chess.fen(),
+      ...gameFENs.slice(0, fenPointer + 1),
+      game.chess.fen(),
     ];
-    setAllGameFEN(newAllGameFEN);
-    const checkingMove = checkNewMove(newHistory);
-    if (!checkingMove) {
-      reverseIncorrectMove();
-    }
+    setGameFENs(newAllGameFEN);
   }
 
   return (
@@ -213,9 +226,17 @@ const Chessboard = ({
         ref={chessboardRef}
       >
         {board}
-        <div className="w-[32vw] justify-center grid grid-cols-2">
-          <button onClick={(e) => goToPreviousBoardState(e)}>&#x2190;</button>
-          <button onClick={(e) => goToNextBoardState(e)} className=" ">
+        <div className="w-[32vw] h-[1vw] justify-center grid grid-cols-2">
+          <button
+            onClick={(e) => goToPreviousBoardState(e)}
+            className=" border-2 border-black text-[1vw]"
+          >
+            &#x2190;
+          </button>
+          <button
+            onClick={(e) => goToNextBoardState(e)}
+            className="border-2 border-black text-[1vw]"
+          >
             &#x2192;
           </button>
         </div>

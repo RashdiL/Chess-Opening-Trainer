@@ -31,4 +31,5 @@
 
 .tile img {
   width: 4vw;
+  z-index: 1;
 }

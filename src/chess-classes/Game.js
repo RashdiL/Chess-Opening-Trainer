@@ -8,10 +8,8 @@ import Square from "./Square";
 
 class Game {
   constructor(thisPlayersColorIsWhite, FEN) {
-    this.thisPlayersColorIsWhite = thisPlayersColorIsWhite; // once initialized, this value should never change.
-    // console.log("this player's color is white: " + this.thisPlayersColorIsWhite)
-    //this.chess = new Chess();
-    this.chessBoard = this.makeStartingBoard(FEN); // the actual chessBoard
+    this.thisPlayersColorIsWhite = thisPlayersColorIsWhite;
+    this.chessBoard = this.makeBoard(FEN); // the actual chessBoard
 
     //Converts our 0 - 7 coords to chess 1 - 8 vertical coords
     this.toCoord = thisPlayersColorIsWhite
@@ -300,6 +298,12 @@ class Game {
     return res;
   }
 
+  undoMove() {
+    this.chess.undo();
+    const newFEN = this.chess.fen();
+    this.makeBoard(newFEN);
+  }
+
   toChessMove(finalPosition, to2D) {
     let move;
 
@@ -327,7 +331,7 @@ class Game {
     }
   }
 
-  makeStartingBoard(FEN) {
+  makeBoard(FEN) {
     const toAlphabet2 = this.thisPlayersColorIsWhite
       ? {
           a: 0,

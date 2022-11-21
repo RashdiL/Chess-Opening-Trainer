@@ -1,6 +1,4 @@
-import { Modal, Typography } from "@mui/material";
-import { Box } from "@mui/system";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import Chessboard from "../Chessboard/Chessboard";
 import Movehistory from "../MoveHistory/Movehistory";
 import SavedOpening from "../SavedOpening/SavedOpening";
@@ -11,11 +9,8 @@ export default function Trainer() {
   const [savedOpenings, setSavedOpenings] = useState();
   const [testingOpening, setTestingOpening] = useState();
   const [resetBoard, setResetBoard] = useState(false);
-  const [isBackgroundRed, setIsBackgroundRed] = useState(false);
-  const [isBackgroundGreen, setIsBackgroundGreen] = useState(false);
-  const [backgroundColor, setBackgroundColor] = useState();
-  const [incorrectMove, setIncorrectMove] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [wrongToggled, setWrongToggled] = useState(false);
+  const [rightToggled, setRightToggled] = useState(false);
 
   function checkNewMove(history) {
     if (testingOpening) {
@@ -27,53 +22,53 @@ export default function Trainer() {
       });
       for (let i = 0; i < history.length; i++) {
         if (history[i] !== formattedTestingOpening[i]) {
-          setIsBackgroundRed(true);
-          setBackgroundColor("bg-red-400");
           return false;
         } else {
           if (history.length === formattedTestingOpening.length) {
-            setBackgroundColor("bg-green-400");
-            return true;
+            return "complete";
           }
         }
       }
     }
     return true;
   }
-  function handleOpen() {
-    setModalOpen(true);
-  }
-  function handleClose() {
-    setModalOpen(false);
-  }
+
   return (
-    <div className={backgroundColor}>
-      <Modal
-        open={modalOpen}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <h1 className=" text-center">WRONG</h1>
-      </Modal>
-      <nav>Hello</nav>
-      <button
-        onClick={(e) => {
-          handleOpen(e);
-        }}
-      >
-        open modal
-      </button>
-      <div className=" grid grid-flow-col gap-2 h-[32vw] w-[60vw] mx-[20vw] my-[10vw] auto-cols-min">
-        <Chessboard
-          setCurrentMove={setCurrentMove}
-          setHistory={setHistory}
-          history={history}
-          className="m-0 p-0"
-          checkNewMove={checkNewMove}
-          resetBoard={resetBoard}
-          setResetBoard={setResetBoard}
+    <div>
+      <nav className="py-5 mb-5 flex justify-center bg-[#1aadc0] font-bold text-white">
+        <h1 className="font-burtons text-xl content-center">
+          Chess Opening Trainer
+        </h1>
+      </nav>
+      {wrongToggled && (
+        <img
+          className=" absolute left-[33.5vw] top-[28.5vw] h-[5vw] w-[5vw]"
+          src="assets/images/incorrect.png"
+          alt="incorrect"
         />
+      )}
+      {rightToggled && (
+        <img
+          className=" absolute left-[33.5vw] top-[28.5vw] h-[5vw] w-[5vw]"
+          src="assets/images/checkmark.jpeg"
+          alt="correct"
+        />
+      )}
+      <div className=" grid grid-flow-col gap-2 h-[32vw] w-[60vw] mx-[20vw] my-[10vw] auto-cols-min">
+        <div>
+          <Chessboard
+            setCurrentMove={setCurrentMove}
+            setHistory={setHistory}
+            history={history}
+            className="m-0 p-0 relative"
+            checkNewMove={checkNewMove}
+            resetBoard={resetBoard}
+            setResetBoard={setResetBoard}
+            setWrongToggled={setWrongToggled}
+            setRightToggled={setRightToggled}
+            testingOpening={testingOpening}
+          />
+        </div>
         <Movehistory
           currentMove={currentMove}
           history={history}
