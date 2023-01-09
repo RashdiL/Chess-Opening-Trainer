@@ -25,6 +25,7 @@ export default function Trainer() {
           return false;
         } else {
           if (history.length === formattedTestingOpening.length) {
+            setTestingOpening(false);
             return "complete";
           }
         }

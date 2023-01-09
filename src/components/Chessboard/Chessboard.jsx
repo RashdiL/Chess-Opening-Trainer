@@ -87,6 +87,12 @@ const Chessboard = ({
               setRightToggled(false);
             } else {
               makeNewMove();
+              const formattedTestingOpening = [];
+              testingOpening.forEach((Element) => {
+                Element.forEach((el) => {
+                  formattedTestingOpening.push(el);
+                });
+              });
             }
           }
         } else {
