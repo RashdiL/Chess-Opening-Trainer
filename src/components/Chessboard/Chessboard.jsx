@@ -87,20 +87,20 @@ const Chessboard = ({
         attemptedMove !== "moved in the same position."
       ) {
         if (testingOpening) {
-          const checkingMove = checkNewMove(game.chess.history());
+          const testHistory = history.concat(game.chess.history().slice(-1));
+          const checkingMove = checkNewMove(testHistory);
           if (!checkingMove) {
             activePiece.style.position = "relative";
             activePiece.style.removeProperty("top");
             activePiece.style.removeProperty("left");
-            console.log(`curr history: ${history}`);
-            console.log(`curr game history: ${game.chess.history()}`);
             game.chess.undo();
-            console.log(`undo history: ${game.chess.history()}`);
-            setHistory(game.chess.history());
+            const newGame = new Game(true, game.chess.fen());
+            setGame(newGame);
+            setBoard(createBoard(newGame.getBoard()));
+            setActivePiece(null);
             setWrongToggled(true);
             await delay(1000);
             setWrongToggled(false);
-            console.log(`history after wrong move made: ${history}`);
           } else {
             if (checkingMove === "complete") {
               makeNewMove();
