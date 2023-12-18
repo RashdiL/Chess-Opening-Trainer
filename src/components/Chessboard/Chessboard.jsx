@@ -14,6 +14,10 @@ const Chessboard = ({
   setRightToggled,
   testingOpening,
 }) => {
+  const [selectedPieceCoordinates, setSelectedPieceCoordinates] = useState([
+    null,
+    null,
+  ]);
   const [activePiece, setActivePiece] = useState(null);
   const [game, setGame] = useState(new Game(true));
   const chessboardRef = useRef(null);
@@ -38,10 +42,18 @@ const Chessboard = ({
     if (e.type === "mousedown") {
       grabPiece(e, chessboard);
       setActivePiece(element);
-      const grabX = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
+      const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+      const grabX = Math.floor(
+        (e.clientX + scrollX - chessboard.offsetLeft) / GRID_SIZE
+      );
       const grabY = Math.abs(
         Math.ceil(
-          (e.clientY - chessboard.offsetTop - chessboard.offsetWidth) /
+          (e.clientY +
+            scrollY -
+            chessboard.offsetTop -
+            chessboard.offsetWidth) /
             GRID_SIZE
         )
       );
@@ -53,10 +65,18 @@ const Chessboard = ({
       movePiece(e, chessboard, activePiece);
     }
     if (e.type === "mouseup") {
-      const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
+      const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+      const x = Math.floor(
+        (e.clientX + scrollX - chessboard.offsetLeft) / GRID_SIZE
+      );
       const y = Math.abs(
         Math.ceil(
-          (e.clientY - chessboard.offsetTop - chessboard.offsetWidth) /
+          (e.clientY +
+            scrollY -
+            chessboard.offsetTop -
+            chessboard.offsetWidth) /
             GRID_SIZE
         )
       );
@@ -72,13 +92,15 @@ const Chessboard = ({
             activePiece.style.position = "relative";
             activePiece.style.removeProperty("top");
             activePiece.style.removeProperty("left");
+            console.log(`curr history: ${history}`);
+            console.log(`curr game history: ${game.chess.history()}`);
             game.chess.undo();
-            const newGame = new Game(true, game.chess.fen());
-            setGame(newGame);
-            setBoard(createBoard(newGame.getBoard()));
+            console.log(`undo history: ${game.chess.history()}`);
+            setHistory(game.chess.history());
             setWrongToggled(true);
             await delay(1000);
             setWrongToggled(false);
+            console.log(`history after wrong move made: ${history}`);
           } else {
             if (checkingMove === "complete") {
               makeNewMove();
@@ -118,8 +140,12 @@ const Chessboard = ({
       )
     );
 
-    const x = e.clientX - GRID_SIZE / 2;
-    const y = e.clientY - GRID_SIZE / 2;
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+    const x = e.clientX + scrollX - GRID_SIZE / 2;
+    const y = e.clientY + scrollY - GRID_SIZE / 2;
+
     element.style.position = "absolute";
     element.style.left = `${x}px`;
     element.style.top = `${y}px`;
@@ -134,8 +160,12 @@ const Chessboard = ({
       chessboard.offsetLeft + chessboard.offsetWidth - (GRID_SIZE / 4) * 3;
     const maxY =
       chessboard.offsetTop + chessboard.offsetHeight - (GRID_SIZE / 4) * 3;
-    const x = e.clientX - GRID_SIZE / 2;
-    const y = e.clientY - GRID_SIZE / 2;
+
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+    const x = e.clientX + scrollX - GRID_SIZE / 2;
+    const y = e.clientY + scrollY - GRID_SIZE / 2;
     activePiece.style.position = "absolute";
 
     if (x < minX) {
@@ -163,7 +193,16 @@ const Chessboard = ({
         const square = pieces[j][i];
         const piece = square.pieceOnThisSquare;
         let image = piece ? piece.image : undefined;
-        board.push(<Tile key={`${j},${i}`} image={image} number={number} />);
+        board.push(
+          <Tile
+            key={`${j},${i}`}
+            image={image}
+            number={number}
+            setSelectedPieceCoordinates={setSelectedPieceCoordinates}
+            YCoord={j}
+            XCoord={i}
+          />
+        );
       }
     }
     return board;
@@ -202,6 +241,7 @@ const Chessboard = ({
     setFENPointer(0);
     setCurrentMove(0);
     setBoard(createBoard(newGame.getBoard()));
+    console.log("restarting game");
     setHistory([]);
   }
 
@@ -214,6 +254,9 @@ const Chessboard = ({
     const newHistory = history
       .slice(0, oldFENPointer)
       .concat(game.chess.history().slice(-1));
+    console.log(`last history: ${history}`);
+    console.log(`last history slice: ${history.slice(0, oldFENPointer)}`);
+    console.log(`added history: ${game.chess.history().slice(-1)}`);
     setHistory(newHistory);
     const newAllGameFEN = [
       ...gameFENs.slice(0, fenPointer + 1),

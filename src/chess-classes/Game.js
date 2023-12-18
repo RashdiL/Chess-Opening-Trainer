@@ -9,101 +9,35 @@ import Square from "./Square";
 class Game {
   constructor(thisPlayersColorIsWhite, FEN) {
     this.thisPlayersColorIsWhite = thisPlayersColorIsWhite;
-    this.chessBoard = this.makeBoard(FEN); // the actual chessBoard
-
-    //Converts our 0 - 7 coords to chess 1 - 8 vertical coords
-    this.toCoord = thisPlayersColorIsWhite
-      ? {
-          0: 1,
-          1: 2,
-          2: 3,
-          3: 4,
-          4: 5,
-          5: 6,
-          6: 7,
-          7: 8,
-        }
-      : {
-          0: 8,
-          1: 7,
-          2: 6,
-          3: 5,
-          4: 4,
-          5: 3,
-          6: 2,
-          7: 1,
-        };
-
-    //Converts our 0 - 7 coords to chess horizontal a - h coords
-    this.toAlphabet = thisPlayersColorIsWhite
-      ? {
-          0: "a",
-          1: "b",
-          2: "c",
-          3: "d",
-          4: "e",
-          5: "f",
-          6: "g",
-          7: "h",
-        }
-      : {
-          0: "h",
-          1: "g",
-          2: "f",
-          3: "e",
-          4: "d",
-          5: "c",
-          6: "b",
-          7: "a",
-        };
-
-    //Opposite of toCoord
-    this.toCoord2 = thisPlayersColorIsWhite
-      ? {
-          1: 0,
-          2: 1,
-          3: 2,
-          4: 3,
-          5: 4,
-          6: 5,
-          7: 6,
-          8: 7,
-        }
-      : {
-          8: 0,
-          7: 1,
-          6: 2,
-          5: 3,
-          4: 4,
-          3: 5,
-          2: 6,
-          1: 7,
-        };
-
-    //Opposite of toAlphabet
-    this.toAlphabet2 = thisPlayersColorIsWhite
-      ? {
-          a: 0,
-          b: 1,
-          c: 2,
-          d: 3,
-          e: 4,
-          f: 5,
-          g: 6,
-          h: 7,
-        }
-      : {
-          h: 0,
-          g: 1,
-          f: 2,
-          e: 3,
-          d: 4,
-          c: 5,
-          b: 6,
-          a: 7,
-        };
-
+    this.chessBoard = this.makeBoard(FEN);
     this.nQueens = 1;
+    this.chess = new Chess(FEN);
+    this.initializeCoordMappings(thisPlayersColorIsWhite);
+  }
+  initializeCoordMappings(isWhite) {
+    const baseMappings = {
+      coord: Array.from({ length: 8 }, (_, i) => i + 1),
+      alphabet: ["a", "b", "c", "d", "e", "f", "g", "h"],
+    };
+
+    if (isWhite) {
+      this.toCoord = this.createMapping(baseMappings.coord, true);
+      this.toAlphabet = this.createMapping(baseMappings.alphabet, true);
+      this.toCoord2 = this.createMapping(baseMappings.coord, false);
+      this.toAlphabet2 = this.createMapping(baseMappings.alphabet, false);
+    } else {
+      this.toCoord = this.createMapping(baseMappings.coord, false);
+      this.toAlphabet = this.createMapping(baseMappings.alphabet, false);
+      this.toCoord2 = this.createMapping(baseMappings.coord, true);
+      this.toAlphabet2 = this.createMapping(baseMappings.alphabet, true);
+    }
+  }
+
+  createMapping(array, isDirect) {
+    return array.reduce((acc, val, index) => {
+      acc[isDirect ? index : array.length - index - 1] = val;
+      return acc;
+    }, {});
   }
 
   getBoard() {

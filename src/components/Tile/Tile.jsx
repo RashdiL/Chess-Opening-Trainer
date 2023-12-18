@@ -1,9 +1,21 @@
 import "./Tile.css";
-
-export default function Tile({ number, image }) {
+import { useEffect, useRef, useState } from "react";
+export default function Tile({
+  number,
+  image,
+  setSelectedPieceCoordinates,
+  XCoord,
+  YCoord,
+}) {
+  const [isPiece, setIsPiece] = useState(image ? true : false);
   if (number % 2 === 0) {
     return (
-      <div className="tile black-tile">
+      <div
+        className="tile black-tile"
+        onMouseDown={(e) => {
+          setSelectedPieceCoordinates([XCoord, YCoord]);
+        }}
+      >
         {image && (
           <div
             style={{ backgroundImage: `url(${image})` }}
@@ -14,7 +26,12 @@ export default function Tile({ number, image }) {
     );
   } else {
     return (
-      <div className="tile white-tile">
+      <div
+        className="tile white-tile"
+        onMouseDown={(e) => {
+          setSelectedPieceCoordinates([XCoord, YCoord]);
+        }}
+      >
         {image && (
           <div
             style={{ backgroundImage: `url(${image})` }}

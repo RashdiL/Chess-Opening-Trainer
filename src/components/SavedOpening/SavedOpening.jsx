@@ -8,7 +8,7 @@ export default function SavedOpening({
 }) {
   const activeButtonRef = useRef(null);
   function changeButtonColor(e) {
-    console.log(e);
+    // console.log(e);
   }
   return (
     <div className="grid grid-flow-row">

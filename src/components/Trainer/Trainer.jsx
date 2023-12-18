@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Chessboard from "../Chessboard/Chessboard";
 import Movehistory from "../MoveHistory/Movehistory";
 import SavedOpening from "../SavedOpening/SavedOpening";
@@ -12,7 +12,12 @@ export default function Trainer() {
   const [wrongToggled, setWrongToggled] = useState(false);
   const [rightToggled, setRightToggled] = useState(false);
 
+  useEffect(() => {
+    console.log(`history change to: ${history}`);
+  }, [history]);
+
   function checkNewMove(history) {
+    console.log(`history: ${history}`);
     if (testingOpening) {
       const formattedTestingOpening = [];
       testingOpening.forEach((Element) => {
@@ -20,7 +25,9 @@ export default function Trainer() {
           formattedTestingOpening.push(el);
         });
       });
-      for (let i = 0; i < history.length; i++) {
+      console.log(`formattedTestingOpening: ${formattedTestingOpening}`);
+      let i = 0;
+      while (history[i]) {
         if (history[i] !== formattedTestingOpening[i]) {
           return false;
         } else {
@@ -29,7 +36,18 @@ export default function Trainer() {
             return "complete";
           }
         }
+        i++;
       }
+      // for (let i = 0; i < history.length; i++) {
+      //   if (history[i] !== formattedTestingOpening[i]) {
+      //     return false;
+      //   } else {
+      //     if (history.length === formattedTestingOpening.length) {
+      //       setTestingOpening(false);
+      //       return "complete";
+      //     }
+      //   }
+      // }
     }
     return true;
   }
