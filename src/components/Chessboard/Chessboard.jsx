@@ -14,10 +14,6 @@ const Chessboard = ({
   setRightToggled,
   testingOpening,
 }) => {
-  const [selectedPieceCoordinates, setSelectedPieceCoordinates] = useState([
-    null,
-    null,
-  ]);
   const [activePiece, setActivePiece] = useState(null);
   const [game, setGame] = useState(new Game(true));
   const chessboardRef = useRef(null);
@@ -198,7 +194,6 @@ const Chessboard = ({
             key={`${j},${i}`}
             image={image}
             number={number}
-            setSelectedPieceCoordinates={setSelectedPieceCoordinates}
             YCoord={j}
             XCoord={i}
           />
